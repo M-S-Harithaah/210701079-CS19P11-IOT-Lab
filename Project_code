@@ -1,0 +1,80 @@
+1. Setup
+void setup() {
+Serial.begin(115200);
+delay(10);
+Serial.println(F("Adafruit MQTT demo"));
+// Connect to WiFi access point.
+Serial.println(); Serial.println();
+Serial.print("Connecting to ");
+Serial.println(WLAN_SSID);
+WiFi.begin(WLAN_SSID, WLAN_PASS);
+while (WiFi.status() != WL_CONNECTED) {
+delay(500);
+Serial.print(".");
+}
+Serial.println();
+Serial.println("WiFi connected");
+Serial.println("IP address: "); Serial.println(WiFi.localIP());
+pinMode(ldr1,INPUT_PULLUP);
+pinMode(ldr2,INPUT_PULLUP);
+pinMode(ir1,INPUT_PULLUP);
+pinMode(ir2,INPUT_PULLUP);
+}
+
+2. Loop
+void loop() {
+MQTT_connect();
+if(!digitalRead(ldr1)){
+photocell1.publish("street light at ambattur working");
+}
+else{
+photocell1.publish("street light at ambattur not working");
+}
+delay(5000);
+if(!digitalRead(ldr2)){
+photocell2.publish("street light at avadi working");
+}
+else{
+photocell2.publish("street light at avadi not working");
+}
+delay(5000);
+if(!digitalRead(ir1)){
+analogWrite(led1,255);
+}
+else{
+analogWrite(led1,50);
+}
+if(!digitalRead(ir2)){
+analogWrite(led2,255);
+}
+else{
+analogWrite(led2,50);
+}
+// ping the server to keep the mqtt connection alive
+// NOT required if you are publishing once every KEEPALIVE seconds
+/*
+if(! mqtt.ping()) {
+mqtt.disconnect();
+}
+*/
+}
+void MQTT_connect() {
+int8_t ret;
+16
+if (mqtt.connected()) {
+return;
+}
+Serial.print("Connecting to MQTT... ");
+uint8_t retries = 3;
+while ((ret = mqtt.connect()) != 0) {
+Serial.println(mqtt.connectErrorString(ret));
+Serial.println("Retrying MQTT connection in 5 seconds...");
+mqtt.disconnect();
+delay(5000); // wait 5 seconds
+retries--;
+if (retries == 0) {
+while (1);
+}
+}
+Serial.println("MQTT Connected!");
+}
